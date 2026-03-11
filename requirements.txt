@@ -1,0 +1,5 @@
+streamlit==1.41.0
+pandas==2.2.3
+pyodbc==5.2.0
+plotly==5.24.1
+reportlab==4.1.0

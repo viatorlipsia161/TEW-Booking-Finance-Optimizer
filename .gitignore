@@ -1,0 +1,37 @@
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+dist/
+build/
+.venv/
+venv/
+
+# TEW user data (private save game data)
+tew_data/config.json
+tew_data/momentum_history.json
+tew_data/storylines.json
+tew_data/events.json
+tew_data/card_templates/
+tew_data/backups/
+
+# Test & debug scripts
+scan_db.py
+check_*.py
+test_*.py
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS
+Thumbs.db
+.DS_Store
+desktop.ini
+
+# Misc
+*.jpg
+*.png
+tew_config.json
