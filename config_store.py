@@ -26,9 +26,9 @@ DEFAULTS = {
 
 
 def _ensure_dirs():
-    DATA_DIR.mkdir(exist_ok=True)
-    TEMPLATES_DIR.mkdir(exist_ok=True)
-    BACKUP_DIR.mkdir(exist_ok=True)
+    DATA_DIR.mkdir(parents=True, exist_ok=True)
+    TEMPLATES_DIR.mkdir(parents=True, exist_ok=True)
+    BACKUP_DIR.mkdir(parents=True, exist_ok=True)
 
 
 # ──────────────────────────────────────────────

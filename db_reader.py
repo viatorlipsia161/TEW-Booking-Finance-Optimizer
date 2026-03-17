@@ -564,6 +564,8 @@ def build_roster(mdb_path: str, promotion_name: str) -> pd.DataFrame:
     skill_cols = ["Brawling", "Technical", "Aerial", "Puroresu", "Flashiness",
                   "Selling", "Basics", "Psychology"]
     available_skills = [c for c in skill_cols if c in roster.columns]
+    for c in available_skills:
+        roster[c] = pd.to_numeric(roster[c], errors="coerce").fillna(0)
     roster["AvgSkill"] = roster[available_skills].mean(axis=1) if available_skills else 50
 
     # Home-Region Popularity

@@ -186,9 +186,15 @@ with st.sidebar:
                 st.success(f"✅ {len(roster)} workers loaded!")
             except FileNotFoundError:
                 st.error("❌ MDB file not found! Check the path and make sure the file exists.")
+                st.warning(
+                    "**Tips:**\n"
+                    "- Make sure the path includes the **full file name** ending in `.mdb`\n"
+                    "- The tool does NOT need to be in the same folder as TEW\n"
+                    "- Example: `C:\\Games\\TEW9\\Databases\\MyDB\\SaveGames\\MySave\\MDBFiles\\MySave_2026-03-02.mdb`"
+                )
             except Exception as e:
                 err_msg = str(e)
-                if "password" in err_msg.lower() or "-1905" in err_msg:
+                if "password" in err_msg.lower() or "-1905" in err_msg or "registry key" in err_msg.lower():
                     st.error("❌ **Password-protected database!**")
                     st.warning(
                         "⚠️ You are trying to open a raw TEW save game file which is password-protected.\n\n"
@@ -197,14 +203,39 @@ with st.sidebar:
                         "2. Go to **Settings** → click **\"Create MDB File\"**\n"
                         "3. The unprotected MDB file will be created in:\n"
                         "   `TEW9\\Databases\\<YourDatabase>\\SaveGames\\<YourSave>\\MDBFiles\\`\n"
-                        "4. Use **that** file path instead."
+                        "4. Use **that** file path instead.\n\n"
+                        "⚠️ Do NOT use the raw `.mdb` files from the SaveGames root — only the ones in the **MDBFiles** subfolder!"
+                    )
+                elif "could not find file" in err_msg.lower() or "(unknown)" in err_msg.lower():
+                    st.error("❌ **Could not find the database file!**")
+                    st.warning(
+                        "The ODBC driver cannot locate the file. Common causes:\n\n"
+                        "1. **Wrong file**: You may be pointing to a password-protected save file instead of the MDB export.\n"
+                        "   → In TEW IX: load save → Settings → **\"Create MDB File\"**\n"
+                        "   → Use the file from the `MDBFiles` subfolder\n\n"
+                        "2. **Path issue**: Make sure the full path is correct including the `.mdb` file name.\n"
+                        "   → Example: `C:\\Games\\TEW9\\Databases\\MyDB\\SaveGames\\MySave\\MDBFiles\\MySave_2026-03-02.mdb`"
+                    )
+                elif "im002" in err_msg.lower() or "datenquellenname" in err_msg.lower() or "data source name" in err_msg.lower():
+                    st.error("❌ **ODBC Driver not found!**")
+                    st.warning(
+                        "The Microsoft Access Database Engine is not installed on your system.\n\n"
+                        "📥 **Download (64-bit):** https://www.microsoft.com/en-us/download/details.aspx?id=54920\n\n"
+                        "Make sure to install the **same architecture** (32/64-bit) as your Python installation.\n"
+                        "After installing, restart your PC and try again."
                     )
                 elif "driver" in err_msg.lower() or "odbc" in err_msg.lower():
-                    st.error("❌ **ODBC Driver not found!**")
+                    st.error("❌ **ODBC Driver error!**")
                     st.warning(
                         "You need the **Microsoft Access Database Engine** installed.\n\n"
                         "📥 Download (64-bit): https://www.microsoft.com/en-us/download/details.aspx?id=54920\n\n"
                         "Make sure to install the **same architecture** (32/64-bit) as your Python installation."
+                    )
+                elif "numeric" in err_msg.lower() and "object" in err_msg.lower():
+                    st.error("❌ **Data type error in database!**")
+                    st.warning(
+                        "Some columns in the database contain unexpected data types.\n"
+                        "Please update the tool to the latest version from GitHub — this bug has been fixed."
                     )
                 else:
                     st.error(f"❌ Error: {e}")
@@ -968,6 +999,8 @@ if page == "🔮 Forecast":
         if fc["current"] > 0:
             forecasts.append({"Worker": name, **fc})
 
+    num_snapshots = len(history.get("snapshots", []))
+
     if forecasts:
         fc_df = pd.DataFrame(forecasts)
         fc_df = fc_df.sort_values("change", ascending=False)
@@ -981,7 +1014,11 @@ if page == "🔮 Forecast":
         with fc2:
             st.markdown(metric_card("Declining", str(len(falling)), "negative"), unsafe_allow_html=True)
         with fc3:
-            st.markdown(metric_card("Snapshots", str(len(history.get("snapshots", []))), "neutral"), unsafe_allow_html=True)
+            st.markdown(metric_card("Snapshots", str(num_snapshots), "neutral"), unsafe_allow_html=True)
+
+        if num_snapshots < 3:
+            st.info(f"📊 You have **{num_snapshots}** snapshot(s). Forecasts improve with more data — "
+                    "connect to your database regularly to build up history!")
 
         display_fc = fc_df[["Worker", "current", "predicted", "change", "trend", "momentum", "confidence"]].copy()
         display_fc.columns = ["Worker", "Current Pop", "Predicted Pop", "Change", "Trend", "Momentum", "Confidence"]
@@ -994,8 +1031,15 @@ if page == "🔮 Forecast":
                      title=f"Predicted Popularity Change ({months_ahead} months)")
         fig.update_layout(**DARK_LAYOUT, xaxis_tickangle=-45)
         st.plotly_chart(fig, use_container_width=True)
-    else:
+    elif not worker_names:
         st.info("Connect to a database to generate forecasts.")
+    elif num_snapshots == 0:
+        st.info("📊 **No momentum snapshots yet.** Connect to your database using '🔌 Connect Database' — "
+                "each time you connect, a snapshot is saved. After 1+ snapshots, forecasts will appear here.")
+    else:
+        st.info(f"📊 You have **{num_snapshots}** snapshot(s) but no forecastable workers found. "
+                "This can happen if popularity data is missing — make sure you use the promotion's **initials** "
+                "(e.g. WWF, WCW) when connecting.")
 
 # ═══════════════════════════════════════════════
 # TAB: Worker Development Suggestions
