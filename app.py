@@ -147,10 +147,12 @@ with st.sidebar:
     st.markdown("## 🤼 TEW Optimizer")
 
     mdb_path = st.text_input("Path to TEW .mdb file", value=st.session_state.mdb_path,
-                             placeholder=r"G:\TEW9\...\SaveGame.mdb")
+                             placeholder=r"C:\TEW9\...\MDBFiles\Save_2026-01-01.mdb",
+                             help="Use the MDB from TEW Settings → 'Create MDB File'. "
+                                  "Path: TEW9\\Databases\\<DB>\\SaveGames\\<Save>\\MDBFiles\\")
     promotion = st.text_input("Promotion Abbreviation", value=st.session_state.promotion,
-                              placeholder="e.g. EVE, WWE, AEW ...",
-                              help="Must appear in the CompanyName in the DB.")
+                              placeholder="e.g. WWF, WCW, EVE ...",
+                              help="Enter your promotion's initials/abbreviation as shown in TEW (e.g. WWF, WCW, EVE).")
 
     # Auto-reload detection
     if st.session_state.mdb_path:
@@ -183,9 +185,29 @@ with st.sidebar:
                     save_momentum_snapshot(roster, mdb_path)
                 st.success(f"✅ {len(roster)} workers loaded!")
             except FileNotFoundError:
-                st.error("❌ MDB file not found!")
+                st.error("❌ MDB file not found! Check the path and make sure the file exists.")
             except Exception as e:
-                st.error(f"❌ Error: {e}")
+                err_msg = str(e)
+                if "password" in err_msg.lower() or "-1905" in err_msg:
+                    st.error("❌ **Password-protected database!**")
+                    st.warning(
+                        "⚠️ You are trying to open a raw TEW save game file which is password-protected.\n\n"
+                        "**How to fix:**\n"
+                        "1. Open TEW IX and **load your save game**\n"
+                        "2. Go to **Settings** → click **\"Create MDB File\"**\n"
+                        "3. The unprotected MDB file will be created in:\n"
+                        "   `TEW9\\Databases\\<YourDatabase>\\SaveGames\\<YourSave>\\MDBFiles\\`\n"
+                        "4. Use **that** file path instead."
+                    )
+                elif "driver" in err_msg.lower() or "odbc" in err_msg.lower():
+                    st.error("❌ **ODBC Driver not found!**")
+                    st.warning(
+                        "You need the **Microsoft Access Database Engine** installed.\n\n"
+                        "📥 Download (64-bit): https://www.microsoft.com/en-us/download/details.aspx?id=54920\n\n"
+                        "Make sure to install the **same architecture** (32/64-bit) as your Python installation."
+                    )
+                else:
+                    st.error(f"❌ Error: {e}")
         else:
             st.warning("Please enter MDB path and promotion abbreviation.")
 
