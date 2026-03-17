@@ -371,27 +371,28 @@ def suggest_best_matches(
         selected = []
         used_workers = set()
         attempts = 0
-        max_attempts = pool_size * 2
+        max_attempts = pool_size * 3
 
         while len(selected) < top_n and attempts < max_attempts:
             pick = random.choices(pool, weights=weights, k=1)[0]
             attempts += 1
 
-            # For first N/2 picks, enforce unique workers for card variety
-            if len(selected) < top_n // 2:
-                if pick["Worker1UID"] in used_workers or pick["Worker2UID"] in used_workers:
-                    continue
+            # Enforce unique workers: no wrestler appears in two matches
+            if pick["Worker1UID"] in used_workers or pick["Worker2UID"] in used_workers:
+                continue
 
             if pick not in selected:
                 selected.append(pick)
                 used_workers.add(pick["Worker1UID"])
                 used_workers.add(pick["Worker2UID"])
 
-        # Fill remaining if needed
+        # Fill remaining if needed (still enforce uniqueness)
         if len(selected) < top_n:
             for s in pool:
-                if s not in selected:
+                if s not in selected and s["Worker1UID"] not in used_workers and s["Worker2UID"] not in used_workers:
                     selected.append(s)
+                    used_workers.add(s["Worker1UID"])
+                    used_workers.add(s["Worker2UID"])
                 if len(selected) >= top_n:
                     break
 
@@ -399,7 +400,17 @@ def suggest_best_matches(
         return selected[:top_n]
     else:
         all_suggestions.sort(key=lambda x: x["PredictedRating"], reverse=True)
-        return all_suggestions[:top_n]
+        # Still enforce unique workers even without variety randomization
+        unique_selected = []
+        used = set()
+        for s in all_suggestions:
+            if s["Worker1UID"] not in used and s["Worker2UID"] not in used:
+                unique_selected.append(s)
+                used.add(s["Worker1UID"])
+                used.add(s["Worker2UID"])
+            if len(unique_selected) >= top_n:
+                break
+        return unique_selected
 
 
 # ──────────────────────────────────────────────
