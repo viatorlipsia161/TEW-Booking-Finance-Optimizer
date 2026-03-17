@@ -314,9 +314,18 @@ MACRO_REGIONS = {
 def get_company_home_region(mdb_path: str, promotion_name: str) -> tuple[str, str]:
     """
     Determines the company's home region.
+    Checks both Name and Initials columns so abbreviations (e.g. 'WWF') work.
     Returns: (based_in_label, column_name) e.g. ("Southern England", "Southern_England")
     """
     companies = get_companies(mdb_path)
+    # Try Initials first (exact match, most common user input)
+    if "Initials" in companies.columns:
+        mask = companies["Initials"].str.strip().str.upper() == promotion_name.strip().upper()
+        if mask.any():
+            based_in = companies.loc[mask, "Based_In"].iloc[0]
+            col_name = REGION_COLUMN_MAP.get(based_in, "")
+            return based_in, col_name
+    # Fallback: search in full Name
     mask = companies["Name"].str.contains(promotion_name, case=False, na=False)
     if mask.any():
         based_in = companies.loc[mask, "Based_In"].iloc[0]
