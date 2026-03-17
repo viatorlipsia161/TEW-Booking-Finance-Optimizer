@@ -30,11 +30,11 @@ for /f "tokens=*" %%i in ('py --version 2^>^&1') do echo       Found: %%i
 
 REM ── Step 2: Check Python version ──
 echo [2/4] Checking Python version...
-py -c "import sys; v=sys.version_info; exit(0 if 10<=v.minor<=13 else 1)" >nul 2>&1
+py -c "import sys; v=sys.version_info; exit(0 if v.major==3 and v.minor>=10 else 1)" >nul 2>&1
 if errorlevel 1 (
     echo.
-    echo [WARNING] You are using a Python version that may cause problems.
-    echo          Python 3.10 - 3.13 is required. We recommend Python 3.12.
+    echo [WARNING] Your Python version is too old. Python 3.10 or higher is required.
+    echo          We recommend Python 3.12.
     echo.
     echo How to fix:
     echo   1. Download Python 3.12 from:
@@ -114,7 +114,6 @@ echo   Close this window or press Ctrl+C to stop.
 echo ============================================
 echo.
 
-start "" http://localhost:8501
-py -m streamlit run app.py --server.port 8501 --server.headless true
+py -m streamlit run app.py --server.port 8501
 
 pause
