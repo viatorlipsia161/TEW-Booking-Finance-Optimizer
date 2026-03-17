@@ -16,9 +16,30 @@ if errorlevel 1 (
     exit /b 1
 )
 
+REM Check Python version (recommend 3.10-3.13)
+echo Checking Python version...
+py -c "import sys; v=sys.version_info; exit(0 if 10<=v.minor<=13 else 1)" >nul 2>&1
+if errorlevel 1 (
+    echo [WARNING] Python 3.10-3.13 recommended. Newer versions may have issues installing pyodbc.
+    echo Download Python 3.12: https://www.python.org/downloads/release/python-3129/
+    echo.
+)
+
 REM Install/update dependencies
 echo Installing dependencies (first start may take a minute)...
 py -m pip install -r requirements.txt --no-input --disable-pip-version-check
+if errorlevel 1 (
+    echo.
+    echo [ERROR] Some dependencies failed to install.
+    echo.
+    echo Common fix for pyodbc errors:
+    echo   1. Use Python 3.12 (recommended): https://www.python.org/downloads/release/python-3129/
+    echo   2. Or install Microsoft C++ Build Tools: https://visualstudio.microsoft.com/visual-cpp-build-tools/
+    echo   3. Then re-run this script.
+    echo.
+    pause
+    exit /b 1
+)
 echo.
 
 echo Starting TEW Optimizer...

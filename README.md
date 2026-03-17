@@ -54,9 +54,10 @@ This tool reads your TEW IX save game database (`.mdb` file) and gives you a pow
 
 You need the following installed on your Windows PC:
 
-### 1. Python 3.10 or newer
-- Download: https://www.python.org/downloads/
+### 1. Python 3.10–3.13 (recommended: 3.12)
+- Download: https://www.python.org/downloads/release/python-3129/
 - **Important:** During installation, check ✅ **"Add Python to PATH"**
+- ⚠️ Python 3.14+ may cause issues installing `pyodbc` (no pre-built wheels available yet)
 
 ### 2. Microsoft Access Database Engine
 - This is needed to read TEW's `.mdb` database files
@@ -123,7 +124,9 @@ You need the following installed on your Windows PC:
 |---------|----------|
 | "Python not found" | Install Python and check "Add to PATH" during installation |
 | "No driver found" or ODBC error | Install Microsoft Access Database Engine (same bit as Python) |
-| Empty roster after connecting | Check that the promotion abbreviation matches exactly (case-sensitive) |
+| `pyproject.toml` / `pyodbc` install error | Use **Python 3.12** (recommended). Python 3.14+ may not have pre-built pyodbc wheels. Download: https://www.python.org/downloads/release/python-3129/ Alternatively install [Microsoft C++ Build Tools](https://visualstudio.microsoft.com/visual-cpp-build-tools/) |
+| Empty roster after connecting | Check that the promotion abbreviation matches exactly (e.g. `WWF`, `WCW`) |
+| Popularity shows 0 for all workers | Make sure you enter the **Initials** of your promotion (e.g. `WWF` not `World Wrestling Federation`) |
 | App won't start | Make sure port 8501 is free. Close other Streamlit instances first |
 | Charts not showing | Try refreshing the browser page (F5) |
 
@@ -176,9 +179,10 @@ Dieses Tool liest deine TEW IX Spielstand-Datenbank (`.mdb`-Datei) und gibt dir 
 
 Du brauchst Folgendes auf deinem Windows-PC:
 
-### 1. Python 3.10 oder neuer
-- Download: https://www.python.org/downloads/
+### 1. Python 3.10–3.13 (empfohlen: 3.12)
+- Download: https://www.python.org/downloads/release/python-3129/
 - **Wichtig:** Bei der Installation ✅ **"Add Python to PATH"** anhaken!
+- ⚠️ Python 3.14+ kann Probleme bei der `pyodbc`-Installation verursachen (keine fertigen Pakete verfügbar)
 
 ### 2. Microsoft Access Database Engine
 - Wird benötigt, um TEWs `.mdb`-Dateien zu lesen
@@ -245,7 +249,9 @@ Du brauchst Folgendes auf deinem Windows-PC:
 |---------|--------|
 | "Python not found" | Python installieren und "Add to PATH" bei der Installation anhaken |
 | "No driver found" / ODBC-Fehler | Microsoft Access Database Engine installieren (gleiche Bit-Version wie Python) |
-| Leerer Roster nach Verbindung | Promotions-Kürzel prüfen — muss exakt stimmen (Groß-/Kleinschreibung) |
+| `pyproject.toml` / `pyodbc` Installationsfehler | **Python 3.12** verwenden (empfohlen). Python 3.14+ hat evtl. keine fertigen pyodbc-Pakete. Download: https://www.python.org/downloads/release/python-3129/ Alternativ [Microsoft C++ Build Tools](https://visualstudio.microsoft.com/visual-cpp-build-tools/) installieren |
+| Leerer Roster nach Verbindung | Promotions-Kürzel prüfen (z.B. `WWF`, `WCW`) |
+| Popularität zeigt 0 für alle Worker | Die **Initialen** der Promotion eingeben (z.B. `WWF` statt `World Wrestling Federation`) |
 | App startet nicht | Port 8501 muss frei sein. Andere Streamlit-Instanzen vorher schließen |
 | Charts werden nicht angezeigt | Browser-Seite neu laden (F5) |
 
